@@ -1,10 +1,10 @@
+library(banter)
+
 # MAKE MODEL --------------------------------------------------------------
 
-bantMdl <- initBanterModel(training_events)
-bantMdl <- addBanterDetector(bantMdl,
-                             data = detectors,
-                             ntree = 1000,
-                             importance = TRUE)
-bantMdl <- runBanterModel(bantMdl,
-                          ntree = 1000)
-saveRDS(bantMdl, "analysis/data/derived_data/second_training/bant2_num.Rds")
+makeBanterModel <- function(x, det_ntree=1000, ev_ntree=1000) {
+  bantMdl <- initBanterModel(x$events)
+  bantMdl <- addBanterDetector(bantMdl, data=x$detectors, ntree=det_ntree, importance=TRUE)
+  bantMdl <- runBanterModel(bantMdl, ntree = ev_ntree)
+  return(bantMdl)  
+}
