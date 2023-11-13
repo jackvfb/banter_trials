@@ -1,30 +1,61 @@
 ---
-title: "banter-trials"
+title: "Thesis committee meeting"
 author: "Jackson Vanfleet-Brown"
-format: html
+format: revealjs
 editor: visual
+echo: false
+smaller: true
 ---
-## Intro
-```{r}
+
+```{r, output=FALSE}
+library(PAMpal)
 library(banter)
 library(rfPermute)
 bantModels <- readRDS("data/bantModels.rds")
 models <- lapply(bantModels, getBanterModel)
-
 ```
+
+## Agenda
+- Introductions
+- Project overview
+- Review models
+- Q & A
 
 ## Confusion Matrix
-:::{.panel-tabset}
-
-## man1
+::: panel-tabset
+### man1 
 ```{r}
 plotConfMat(models$man1)
-plotInbag(models$man1)
-```
-## man2
-```{r}
-plotConfMat(models$man2)
-plotInbag(models$man1)
 ```
 
+### man2
+```{r}
+plotConfMat(models$man2)
+```
+
+### mtc
+```{r}
+plotConfMat(models$mtc)
+```
 :::
+
+## Important Predictors
+:::{.panel-tabset}
+
+### man1
+```{r}
+plotImpPreds(models$man1, getBanterModelData(bantModels$man1), "species")
+```
+### man2
+```{r}
+plotImpPreds(models$man2, getBanterModelData(bantModels$man2), "species")
+```
+### mtc
+```{r}
+plotImpPreds(models$mtc, getBanterModelData(bantModels$mtc), "species")
+```
+:::
+
+## Questions
+
+-   Should all covariates be used or is it worthwhile to explore different combinations?

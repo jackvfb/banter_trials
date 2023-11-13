@@ -1,14 +1,16 @@
 library(tidyverse)
 
-filterClicks <- function(modelName, clicks, detectorsWanted, paramsWanted){
+filterClicks <- function(modelName, clicks, detectorsWanted, paramsWanted, sppWanted){
   thisData <- clicks[[modelName]]
   thisDetector <- detectorsWanted[[modelName]]
-  result <- doFilter(thisData, thisDetector, paramsWanted)
+  result <- doFilter(thisData, thisDetector, paramsWanted, sppWanted)
 }
 
 
-doFilter <- function(x, detector, params){
+doFilter <- function(x, detector, params, spp){
   result <- x %>%
+    #just get desired species
+    filter(species %in% spp) %>% 
     #subset clicks just from the wanted detector
     filter(detectorName == detector) %>%
     #remove clicks with NA values in needed parameters

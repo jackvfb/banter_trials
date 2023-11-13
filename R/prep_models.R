@@ -11,13 +11,13 @@ library(tidyverse)
 # models, plus any provided event-level data, which at present their is none.
 
 
-makeBanterData <- function(x, by_peak=TRUE) {
+makeBanterData <- function(x, modelParams, by_peak=TRUE) {
   #Make event data frame
   events <- x %>%
     select(eventId, species) %>%
     #reduce to just distinct combinations of event and species for training model
     distinct(eventId, species) %>%
-    ungroup() %>% 
+    mutate(species = as.factor(species)) %>% 
     rename(event.id = eventId)
   
   #Make detector data frame
