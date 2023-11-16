@@ -1,0 +1,4 @@
+- source: banter-trials.qmd
+  quarto-pub:
+    - id: 2e6b729f-a1fb-4ddb-a34a-06b5e9beeb89
+      url: 'https://jackvfb.quarto.pub/thesis-committee-meeting'

@@ -1,61 +1,289 @@
 ---
 title: "Thesis committee meeting"
 author: "Jackson Vanfleet-Brown"
-format: revealjs
-editor: visual
+date: 11-14-2023
+format: pptx
 echo: false
-smaller: true
+bibliography: references.bib
 ---
 
 ```{r, output=FALSE}
 library(PAMpal)
 library(banter)
 library(rfPermute)
-bantModels <- readRDS("data/bantModels.rds")
-models <- lapply(bantModels, getBanterModel)
+
+source("R/getCallRf.R")
+
+bant <- readRDS("data/man-mtc-mdls.rds")
+bantRf <- lapply(bant, getBanterModel)
+callRf <- lapply(bant, getCallRf)
+bantDf <- lapply(bant, getBanterModelData)
 ```
 
 ## Agenda
-- Introductions
-- Project overview
-- Review models
-- Q & A
 
-## Confusion Matrix
+-   Introductions (5 min)
+-   Project overview (5 min)
+    -   Background
+    -   Objective
+    -   Knowns & unknowns
+-   Methods (15 min)
+-   Review models (10 min)
+-   Q & A (25 min)
+
+# Project Overview
+
+## NBHF Odontocetes
+
+-   Narrowband high-frequency (NBHF) clicks are produced by four species in the California Current Ecosystem
+    -   ***P. dalli*** (Dall's porpoise)
+    -   ***P. phocoena*** (harbor porpoise)
+    -   ***K. sima*** (dwarf sperm whale)\*
+    -   ***K. breviceps*** (pygmy sperm whale)\*
+    
+\**cryptic species*
+
+##
+
+:::: {.columns}
+
+::: {.column width="50%"}
+### ADRIFT Survey
+
+-   ADRIFT survey data are processed to detect NBHF clicks but no further steps are taken to classify to species
+-   **Problem because:** surveys are extensive and could be used to estimate population abundance of cryptic *Kogia* species
+:::
+
+::: {.column width="50%"}
+![A map of tracks of drifters deployed 2016-2022](drifts.png)
+:::
+
+:::
+
+## BANTER model
+
+-   Classifies groups of clicks and/or other types of vocalizations (events) using two stages:
+    -   Employs one or more call classifiers at the first stage
+    -   At second stage, uses distributions of call classification probabilities, in addition to other event-level variables, to classify events
+
+## Objective
+
+-   Train a BANTER model to classify NBHF echolocation clicks in the California Current System
+    -   Use groundtruth recordings to define classes for Dall's porpoise and harbor porpoise
+    -  Use drifter recordings from Baja to define *Kogia* class
+
+## {.smaller}
+
+### Knowns
+
+- A `randomForest` classification model was trained to discriminate between clusters of NBHF clicks in the California Current [@griffiths2020]
+- Groundtruth recordings of Dall's porpoise had a strong affinity to one cluster
+
+### Unknowns
+
+- To what extent is ambiguity reduced by:
+  - classifying events as opposed to individual clicks
+  - using a supervised approach to training the model
+
+# Methods
+
+## 1. Define Events {.smaller}
+
+For recordings with known species classification, PAMguard databases are created and events are constructed using one of two methods:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+#### Manual
+
+-   Click detections were reviewed referencing features such as bearing, wigner plot, and spectrum.
+- Time intervals containing true clicks were designated as events with no attempt to exclude false positives.
+:::
+
+::: {.column width="50%"}
+#### MTC
+
+-   PAMguard's default harbor porpoise template was used in the MTC module to assign scores to all clicks (higher score means better match)
+-   An algorithm with three parameters (threshold, min clicks per event, min seperation between events) then constructed events.
+-  Analyst reviewed to identify events containing real clicks.
+:::
+
+**Question: How do the methods compare to one another?**
+
+::::
+## 2. Extract click features
+
+-   Events processed using PAMpal to extract click features with a bandpass filter 100-160 kHz
+-   false positives removed by applying filters to remove
+    -   duration > .02 s
+    -   3dB BW > 4kHz
+-   Click channel with the lesser noiseLevel chosen, if applicable.
+
+**Question: should other steps be taken to filter clicks?**
+
+## 3. Train model
+
+- `ntree=1000` for both stages of the model
+- sample size left to default
+
+**Question: Could calls be split into different categories to improve model performance?**
+
+# Review models
+
+## Summary {.scrollable}
+
 ::: panel-tabset
-### man1 
-```{r}
-plotConfMat(models$man1)
-```
 
-### man2
+### manual
+
 ```{r}
-plotConfMat(models$man2)
+summary(bant$man2)
 ```
 
 ### mtc
+
 ```{r}
-plotConfMat(models$mtc)
+summary(bant$mtc)
+```
+:::
+
+## Importance
+
+::: panel-tabset
+
+### manual
+
+```{r}
+plotImportance(bantRf$man2)
+```
+
+### mtc
+
+```{r}
+plotImportance(bantRf$mtc)
 ```
 :::
 
 ## Important Predictors
-:::{.panel-tabset}
 
-### man1
+::: panel-tabset
+
+### manual
+
 ```{r}
-plotImpPreds(models$man1, getBanterModelData(bantModels$man1), "species")
+plotImpPreds(bantRf$man2, bantDf$man2, "species")
 ```
-### man2
-```{r}
-plotImpPreds(models$man2, getBanterModelData(bantModels$man2), "species")
-```
+
 ### mtc
+
 ```{r}
-plotImpPreds(models$mtc, getBanterModelData(bantModels$mtc), "species")
+plotImpPreds(bantRf$mtc, bantDf$mtc, "species")
 ```
 :::
 
-## Questions
+## Votes
 
--   Should all covariates be used or is it worthwhile to explore different combinations?
+::: panel-tabset
+
+### manual
+
+```{r}
+plotVotes(bantRf[[1]])
+```
+
+### mtc
+
+```{r}
+plotVotes(bantRf[[2]])
+```
+:::
+
+## Detector Confusion Matrix
+
+::: panel-tabset
+
+### manual
+
+```{r}
+confusionMatrix(callRf$man2[[1]])
+```
+
+### mtc
+
+```{r}
+confusionMatrix(callRf$mtc[[1]])
+```
+:::
+
+## Detector Importance {.scrollable}
+
+::: panel-tabset
+
+### manual
+
+```{r}
+#| fig-height: 10
+plotImportance(callRf$man2[[1]])
+```
+
+### mtc
+
+```{r}
+#| fig-height: 10
+plotImportance(callRf$mtc[[1]])
+```
+:::
+
+## Detector Trace
+
+::: panel-tabset
+
+### manual
+
+```{r}
+plotDetectorTrace(bant$man2)
+```
+
+### mtc
+
+```{r}
+plotDetectorTrace(bant$mtc)
+```
+:::
+
+## Detector Votes
+
+::: panel-tabset
+
+### manual
+
+```{r}
+plotVotes(callRf$man2[[1]])
+```
+
+### mtc
+
+```{r}
+plotVotes(callRf$mtc[[1]])
+```
+:::
+
+## Questions {.scrollable}
+
+**Defining Events** 
+
+- Can long events containing a large quantity of clicks be divided to increase the number of events available for training the model?
+- How do the methods compare to one another and can we proceed with automated event definition?
+
+**Training model**
+
+- Should other filters be applied to the data before training?
+- Should all covariates be used or is it worthwhile to explore different combinations?
+- Could calls be split into different categories to add sophistication to model and improve performance?
+  - I have a [markdown showing analysis](https://rpubs.com/jackvfb/banter-events-peaks) that gives results of splitting clicks by number of peaks.
+
+**Other**
+
+- Is it important to examine whether or not events from different encounters are similar?
+
+## Citations

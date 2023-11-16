@@ -17,9 +17,13 @@ paramsWanted <- c("duration","peakTime","peak","peak2","peak3","trough","trough2
 
 detectorsWanted <- c(man1="Click_Detector_5", man2="Click_Detector_5", mtc="Click_Detector_101")
 
-myStudies <- lapply(dirs, makeStudies)
+myStudies <- lapply(dirs, makeStudy)
 myClicks <- lapply(myStudies, getClickData)
-filteredClicks <- lapply(modelNames, filterClicks, myClicks, detectorsWanted, paramsWanted, spWanted)
-bantClicks <- lapply(filteredClicks, makeBanterData, paramsWanted, by_peak=FALSE)
+filteredClicks <- lapply(modelNames, filterClickData, myClicks, detectorsWanted, paramsWanted, spWanted)
+bantClicks <- map2(filteredClicks,
+                   c(FALSE, TRUE, FALSE),
+                   ~formatBanterData(.x,by_peak=.y, modelParams=paramsWanted))
 bantModels <- lapply(bantClicks, makeBanterModel)
-lapply(bantModels, summary)
+callRfs <- lapply(bantModels, getCallRf)
+bantRfs <- lapply(bantModels, getBanterModel)
+

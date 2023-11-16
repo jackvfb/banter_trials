@@ -1,6 +1,6 @@
 library(tidyverse)
 
-filterClicks <- function(modelName, clicks, detectorsWanted, paramsWanted, sppWanted){
+filterClickData <- function(modelName, clicks, detectorsWanted, paramsWanted, sppWanted){
   thisData <- clicks[[modelName]]
   thisDetector <- detectorsWanted[[modelName]]
   result <- doFilter(thisData, thisDetector, paramsWanted, sppWanted)
@@ -9,7 +9,7 @@ filterClicks <- function(modelName, clicks, detectorsWanted, paramsWanted, sppWa
 
 doFilter <- function(x, detector, params, spp){
   result <- x %>%
-    #just get desired species
+    #just training data
     filter(species %in% spp) %>% 
     #subset clicks just from the wanted detector
     filter(detectorName == detector) %>%

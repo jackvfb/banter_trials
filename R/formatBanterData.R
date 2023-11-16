@@ -11,7 +11,7 @@ library(tidyverse)
 # models, plus any provided event-level data, which at present their is none.
 
 
-makeBanterData <- function(x, modelParams, by_peak=TRUE) {
+formatBanterData <- function(x, modelParams, by_peak=FALSE) {
   #Make event data frame
   events <- x %>%
     select(eventId, species) %>%
@@ -32,7 +32,7 @@ makeBanterData <- function(x, modelParams, by_peak=TRUE) {
     pk3 <- subset(pk, peak3 != 0)
     detectors = list(pk1=pk1, pk2=pk2, pk3=pk3) 
   } else {
-    detectors = list(Click_Detector_5=pk)
+    detectors = list(pk_together=pk)
   }
   
   #format data for banter model
