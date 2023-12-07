@@ -2,7 +2,7 @@
 title: "Thesis committee meeting"
 author: "Jackson Vanfleet-Brown"
 date: 11-14-2023
-format: pptx
+format: revealjs
 echo: false
 bibliography: references.bib
 ---
